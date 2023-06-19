@@ -1,0 +1,19 @@
+[min]:
+  plcc:  PearsonRResult(statistic=-0.6402031704137378, pvalue=0.35979682958626213)
+  srocc: SignificanceResult(statistic=-0.7999999999999999, pvalue=0.20000000000000007)
+[max]:
+  plcc:  PearsonRResult(statistic=-0.9320877188671635, pvalue=0.06791228113283654)
+  srocc: SignificanceResult(statistic=-1.0, pvalue=0.0)
+[mean]:
+  plcc:  PearsonRResult(statistic=-0.9843902472099957, pvalue=0.015609752790004316)
+  srocc: SignificanceResult(statistic=-1.0, pvalue=0.0)
+[std]:
+  plcc:  PearsonRResult(statistic=0.49933932836182826, pvalue=0.5006606716381716)
+  srocc: SignificanceResult(statistic=0.6000000000000001, pvalue=0.3999999999999999)
+[var]:
+  plcc:  PearsonRResult(statistic=0.4977941575715927, pvalue=0.5022058424284073)
+  srocc: SignificanceResult(statistic=0.6000000000000001, pvalue=0.3999999999999999)
+[median]:
+  plcc:  PearsonRResult(statistic=-0.9668125758832005, pvalue=0.033187424116799535)
+  srocc: SignificanceResult(statistic=-1.0, pvalue=0.0)
+

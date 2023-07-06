@@ -19,8 +19,10 @@ from torch import Tensor
 import numpy as np
 from tqdm import tqdm
 
+from data import MOSs
+
 DATA_PATH = Path('database')
-REF_PATH = DATA_PATH / 'reference' / 'matis_ply_062K'
+REF_PATH = DATA_PATH / 'reference'
 DST_PATH = DATA_PATH / 'distort'
 OUT_PATH = Path('out') ; OUT_PATH.mkdir(exist_ok=True)
 
@@ -50,24 +52,48 @@ def perf_count(fn):
 @perf_count
 @torch.inference_mode()
 def run(args):
-  print('>> check *.ply files ...')
-  ref_fps = sorted([str(fp) for fp in REF_PATH.iterdir()])[args.s:args.t]
-  dst_fps = {dp.name[len('matis_ply_062K_'):]: sorted([str(fp) for fp in dp.iterdir()])[args.s:args.t] for dp in sorted(list(DST_PATH.iterdir()))}
-  for fps in dst_fps.values(): assert len(ref_fps) == len(fps), 'file count mismatch'
-
-  print('>> calc MPEDs ...')
+  # load stats.json if exists
+  fp = OUT_PATH / f'stats_n={args.n}.json'
+  if fp.is_file():
+    with open(fp, 'r', encoding='utf-8') as fh:
+      stats = json.load(fh)
+    # sanity check
+    for k, v in stats['args'].items():
+      if hasattr(args, k) and getattr(args, k) != v:
+        print(f'>> cmdline args mismatch with cached `stats.json`!!')
+        print(f'>> manually delete file {fp} then try again :(')
+        exit(-1)
+  else:
+    stats = None
+  
+  # calc MPED
   MPEDs = defaultdict(list)
-  for i, rfp in enumerate(tqdm(ref_fps)):
-    rpc = sample_pc(load_pc(rfp), args.n)
-    for name, dfps in dst_fps.items():
-      dpc = sample_pc(load_pc(dfps[i]), args.n)
-      MPEDs[name].append(get_MPED(rpc, dpc))
+  for prefix in MOSs:
+    print('>> check *.ply files ...')
+    ref_fps = sorted([str(fp) for fp in (REF_PATH / prefix).iterdir()])[args.s:args.t]
+    dst_fps = {
+      dp.name: sorted([str(fp) for fp in dp.iterdir()])[args.s:args.t] 
+        for dp in sorted([dp for dp in DST_PATH.iterdir() if dp.name.startswith(prefix)])
+    }
+    for fps in dst_fps.values(): assert len(ref_fps) == len(fps), 'file count mismatch'
 
+    print('>> calc MPEDs ...')
+    for i, rfp in enumerate(tqdm(ref_fps)):
+      rpc = sample_pc(load_pc(rfp), args.n)
+      for name, dfps in dst_fps.items():
+        if stats is not None and name in stats['data']:
+          print(f'>> ignore {name} due to already cached')
+          continue
+        dpc = sample_pc(load_pc(dfps[i]), args.n)
+        MPEDs[name].append(get_MPED(rpc, dpc))
+
+  # write MPED stats
   print('>> calc MPEDs stats ...')
-  stats = {
-    'args': vars(args),
-    'data': {},
-  }
+  if stats is None:
+    stats = {
+      'args': vars(args),
+      'data': {},
+    }
   for name, values in MPEDs.items():
     values = np.asarray(values)
     stats['data'][name] = {
@@ -79,7 +105,6 @@ def run(args):
       'var':    np.var   (values).item(),
       'median': np.median(values).item(),
     }
-  fp = OUT_PATH / f'stats_n={args.n}.json'
   with open(fp, 'w', encoding='utf-8') as fh:
     json.dump(stats, fh, ensure_ascii=False, indent=2)
   print(f'>> save stats to {fp}')

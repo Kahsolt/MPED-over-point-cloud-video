@@ -8,15 +8,9 @@ from pathlib import Path
 import matplotlib.pyplot as plt
 from scipy.stats import spearmanr as SROCC, pearsonr as PLCC
 
-OUT_PATH = Path('out') ; assert OUT_PATH.is_dir(), 'should run `run_stats.py` first!'
+from data import MOSs_flat
 
-# NOTE: this is copied from 'subjResults_dsis.xlsx' and hard-coded
-MOSs = {
-  'gQP17-tQP20': 73.1,
-  'gQP30-tQP35': 58.4,
-  'gQP37-tQP43': 29.7,
-  'gQP41-tQP48': 12.7,
-}
+OUT_PATH = Path('out') ; assert OUT_PATH.is_dir(), 'should run `run_stats.py` first!'
 
 
 def run(fp):
@@ -52,7 +46,7 @@ def run(fp):
 
   names = list(MPEDs.keys())
   plt.clf()
-  plt.plot([MOSs[name] for name in names], label='MOS')
+  plt.plot([MOSs_flat[name] for name in names], label='MOS')
   for agg in ['min', 'max', 'mean', 'std', 'var', 'median']:
     plt.plot([data[name][agg] for name in names], label=agg)
   plt.xticks(ticks=list(range(len(MPEDs))), labels=MPEDs.keys())
@@ -66,7 +60,7 @@ def run(fp):
   plccs, sroccs = [], []
   fp = OUT_PATH / f'cc-{n}.txt'
   with open(fp, 'w', encoding='utf-8') as fh:
-    moss = [MOSs[name] for name in names]
+    moss = [MOSs_flat[name] for name in names]
     for agg in AGG_NAMES:
       vals = [data[name][agg] for name in names]
       fh.write(f'[{agg}]:\n')

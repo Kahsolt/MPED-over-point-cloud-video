@@ -9,4 +9,5 @@ database/
 ref/
 
 # repos
-repo/
+repo/*
+!repo/*.cmd

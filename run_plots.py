@@ -4,16 +4,15 @@
 
 import json
 from pathlib import Path
+from argparse import ArgumentParser
 
 import matplotlib.pyplot as plt
 from scipy.stats import spearmanr as SROCC, pearsonr as PLCC
 
 from data import MOSs_flat
 
-OUT_PATH = Path('out') ; assert OUT_PATH.is_dir(), 'should run `run_stats.py` first!'
 
-
-def run(fp):
+def run(fp:Path, out_dp:Path):
   with open(fp, 'r', encoding='utf-8') as fh:
     data = json.load(fh)
   print(f'>> load stats from {fp}')
@@ -30,7 +29,7 @@ def run(fp):
     plt.plot(values, label=name)
   plt.suptitle(f'MPED-{n} per frame')
   plt.legend(loc='upper left')
-  fp = OUT_PATH / f'MPED_timeseq_n={n}.png'
+  fp = out_dp / f'MPED_timeseq_n={n}.png'
   plt.savefig(fp, dpi=600)
   print(f'>> savefig to {fp}')
 
@@ -40,7 +39,7 @@ def run(fp):
     plt.plot(values, label=name)
     plt.legend(loc='upper left')
   plt.suptitle(f'MPED-{n} per frame')
-  fp = OUT_PATH / f'MPED_timeseq_n={n}_seprated.png'
+  fp = out_dp / f'MPED_timeseq_n={n}_seprated.png'
   plt.savefig(fp, dpi=600)
   print(f'>> savefig to {fp}')
 
@@ -52,13 +51,13 @@ def run(fp):
   plt.xticks(ticks=list(range(len(MPEDs))), labels=MPEDs.keys())
   plt.suptitle(f'MPED-{n} agg')
   plt.legend(loc='right')
-  fp = OUT_PATH / f'MPED_agg_n={n}.png'
+  fp = out_dp / f'MPED_agg_n={n}.png'
   plt.savefig(fp, dpi=600)
   print(f'>> savefig to {fp}')
 
   AGG_NAMES = ['min', 'max', 'mean', 'std', 'var', 'median']
   plccs, sroccs = [], []
-  fp = OUT_PATH / f'cc-{n}.txt'
+  fp = out_dp / f'cc-{n}.txt'
   with open(fp, 'w', encoding='utf-8') as fh:
     moss = [MOSs_flat[name] for name in names]
     for agg in AGG_NAMES:
@@ -75,7 +74,7 @@ def run(fp):
   ax = plt.bar(AGG_NAMES, height=plccs)
   plt.bar_label(ax, labels=[f'{x:.4f}' for x in plccs])
   plt.suptitle(f'PLCC-{n}')
-  fp = OUT_PATH / f'plcc_n={n}.png'
+  fp = out_dp / f'plcc_n={n}.png'
   plt.savefig(fp, dpi=600)
   print(f'>> savefig to {fp}')
 
@@ -83,13 +82,19 @@ def run(fp):
   ax = plt.bar(AGG_NAMES, height=sroccs)
   plt.bar_label(ax, labels=[f'{x:.4f}' for x in sroccs])
   plt.suptitle(f'SROCC-{n}')
-  fp = OUT_PATH / f'srocc_n={n}.png'
+  fp = out_dp / f'srocc_n={n}.png'
   plt.savefig(fp, dpi=600)
   print(f'>> savefig to {fp}')
 
 
 if __name__ == '__main__':
-  for fp in OUT_PATH.iterdir():
+  parser = ArgumentParser()
+  parser.add_argument('-O', '--out_dp', default='out', type=Path, help='output folder')
+  args = parser.parse_args()
+  
+  assert args.out_dp.is_dir(), f'should run `run_stats.py -O {args.out_dp}` first!'
+
+  for fp in args.out_dp.iterdir():
     if fp.suffix != '.json': continue
     print(f'>> process: {fp}')
-    run(fp)
+    run(fp, args.out_dp)

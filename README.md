@@ -31,6 +31,7 @@ corelation-coefficient: 衡量客观与主观的相关性
 
 ⚪ install once
 
+- install [Build Tools for Visual Studio 2019](https://visualstudio.microsoft.com/downloads/)
 - **manually** copy & run each cmdline in `install.cmd` to setup everything
 
 ⚪ run each time

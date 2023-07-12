@@ -28,6 +28,10 @@ python setup.py install
 python -m unittest discover -v -s tests -t .
 POPD
 
+PUSHD torch_kdtree
+pip install .
+POPD
+
 pip install plyfile
 pip install matplotlib
 pip install scipy

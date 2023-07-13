@@ -95,9 +95,9 @@ def run(args):
   MPEDs = defaultdict(list)
   for prefix in MOSs:
     print('>> check *.ply files ...')
-    ref_fps = sorted([str(fp) for fp in (REF_PATH / prefix).iterdir()])[args.s:args.t]
+    ref_fps = sorted([str(fp) for fp in (REF_PATH / prefix).iterdir()])[args.s:args.t:args.r]
     dst_fps = {
-      dp.name: sorted([str(fp) for fp in dp.iterdir()])[args.s:args.t] 
+      dp.name: sorted([str(fp) for fp in dp.iterdir()])[args.s:args.t:args.r] 
         for dp in sorted([dp for dp in DST_PATH.iterdir() if dp.name.startswith(prefix)])
     }
     for fps in dst_fps.values(): assert len(ref_fps) == len(fps), 'file count mismatch'
@@ -144,6 +144,7 @@ if __name__ == '__main__':
   parser.add_argument('-m', default=512,  type=int, help='downsampled point count for rpc_fast, should be smaller than -n')
   parser.add_argument('-s', default=None, type=int, help='start from frame idx')
   parser.add_argument('-t', default=None, type=int, help='stop at frame idx')
+  parser.add_argument('-r', default=None, type=int, help='step size for frame idx')
   parser.add_argument('-O', '--out_dp', default='out', type=str, help='output folder')
   parser.add_argument('--with_color', action='store_true')
   args = parser.parse_args()

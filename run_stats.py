@@ -78,7 +78,7 @@ def perf_count(fn):
 @torch.inference_mode()
 def run(args):
   # load stats.json if exists
-  fp = args.out_dp / f'stats_n={args.n}.json'
+  fp = Path(args.out_dp) / f'stats_n={args.n}.json'
   if fp.is_file():
     with open(fp, 'r', encoding='utf-8') as fh:
       stats = json.load(fh)
@@ -144,10 +144,10 @@ if __name__ == '__main__':
   parser.add_argument('-m', default=512,  type=int, help='downsampled point count for rpc_fast, should be smaller than -n')
   parser.add_argument('-s', default=None, type=int, help='start from frame idx')
   parser.add_argument('-t', default=None, type=int, help='stop at frame idx')
-  parser.add_argument('-O', '--out_dp', default='out', type=Path, help='output folder')
+  parser.add_argument('-O', '--out_dp', default='out', type=str, help='output folder')
   parser.add_argument('--with_color', action='store_true')
   args = parser.parse_args()
   
-  args.out_dp.mkdir(exist_ok=True)
+  Path(args.out_dp).mkdir(exist_ok=True)
 
   run(args)
